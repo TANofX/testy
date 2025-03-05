@@ -34,34 +34,44 @@ state.subscribe((value) => {
 class Check {
   private prefix: string;
   private running;
+  private status;
+  private faultsTopic;
   public faults = signal<string[]>([]);
   public runStatus = signal(false);
-  public statusText = signal("OK");
+  public statusText = signal("Unknown status");
   
   constructor(name: string) {
     this.prefix = `/SmartDashboard/SystemStatus/${name}`;
     this.running = ntcore.createTopic<boolean>(`${this.prefix}/SystemCheck/running`, NetworkTablesTypeInfos.kBoolean, false);
-    const status = ntcore.createTopic<string>(`${this.prefix}/Status`, NetworkTablesTypeInfos.kString, "Unknown status, no error.");
+    this.status = ntcore.createTopic<string>(`${this.prefix}/Status`, NetworkTablesTypeInfos.kString, "Unknown status, no error.");
 
-    const faultsTopic = ntcore.createTopic<string[]>(`${this.prefix}/faults`, NetworkTablesTypeInfos.kStringArray);
-    faultsTopic.subscribe((value) => {
+    this.faultsTopic = ntcore.createTopic<string[]>(`${this.prefix}/Faults`, NetworkTablesTypeInfos.kStringArray);
+    this.faultsTopic.subscribe((value) => {
       if(value) this.faults.value = value;
     });
+    this.faults.value = this.faultsTopic.getValue() || [];
 
     this.running.subscribe(running => {
-      console.log(this.prefix, running);
       if(typeof running === "boolean") this.runStatus.value = running;
     });
+    this.runStatus.value = this.running.getValue() || false;
 
-    status.subscribe(status => {
-      console.log(this.prefix, status);
+    this.status.subscribe(status => {
       if(status) this.statusText.value = status;
     });
+    this.statusText.value = this.status.getValue() || "Unknown status";
   }
 
   async run() {
     await this.running.publish();
     this.running.setValue(true);
+  }
+
+  destroy() {
+    this.running.unsubscribeAll();
+    this.running.unpublish();
+    this.faultsTopic.unsubscribeAll();
+    this.status.unsubscribeAll();
   }
 }
 

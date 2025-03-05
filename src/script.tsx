@@ -83,6 +83,7 @@ function App() {
             localStorage.setItem("ip", address);
             localStorage.setItem("port", `${p}`);
             addr.value = address;
+            for (const check of Object.values(checks.value)) check.destroy();
             checks.value = {};
           }}
         >
