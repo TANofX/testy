@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@parcel/service-worker": "^2.13.3",
+    "@preact/signals": "^2.0.1",
     "@shoelace-style/shoelace": "^2.20.0",
     "express": "^4.21.2",
     "ntcore-ts-client": "^3.1.2",
@@ -20,10 +21,15 @@
     "dev": "parcel src/index.html"
   },
   "trustedDependencies": [
-    "@parcel/watcher"
+    "@parcel/watcher",
+    "@swc/core",
+    "lmdb",
+    "msgpackr-extract"
   ],
   "alias": {
     "react": "preact/compat",
-    "react-dom": "preact/compat"
+    "react-dom/test-utils": "preact/test-utils",
+    "react-dom": "preact/compat",
+    "react/jsx-runtime": "preact/jsx-runtime"
   }
 }
