@@ -31,12 +31,6 @@ function App() {
   return (
     <div>
       <div className="body">
-        <Row type="fault" subsystem="Test">
-          Not fast enough
-        </Row>
-        <Row type="info" subsystem="Test">
-          No error.
-        </Row>
         {Object.entries(checks.value).map(([name, check]) =>
           check.runStatus.value ? (
             <Row type="running" subsystem={name}>
