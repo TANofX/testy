@@ -18,7 +18,8 @@
     "preact": "^10.26.4"
   },
   "scripts": {
-    "dev": "parcel src/index.html"
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
   },
   "trustedDependencies": [
     "@parcel/watcher",
