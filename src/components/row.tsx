@@ -1,10 +1,10 @@
 import { SlAlert, SlIcon } from "@shoelace-style/shoelace/dist/react";
 
-export function Row(props: { type: "info" | "warning" | "error", children?: any, subsystem: string }) {
+export function Row(props: { type: "info" | "fault" | "running", children?: any, subsystem: string }) {
   const { icon, variant } = {
     info: { icon: "alert-circle", variant: "primary" as "primary" },
-    warning: { icon: "alert-triangle", variant: "warning" as "warning" },
-    error: { icon: "alert-octagon", variant: "danger" as "danger" },
+    fault: { icon: "alert-triangle", variant: "warning" as "warning" },
+    running: { icon: "play", variant: "neutral" as "neutral" },
   }[props.type];
   return (
     <SlAlert open variant={variant}>

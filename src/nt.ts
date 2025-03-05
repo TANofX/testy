@@ -35,14 +35,27 @@ class Check {
   private prefix: string;
   private running;
   public faults = signal<string[]>([]);
+  public runStatus = signal(false);
+  public statusText = signal("OK");
   
   constructor(name: string) {
     this.prefix = `/SmartDashboard/SystemStatus/${name}`;
     this.running = ntcore.createTopic<boolean>(`${this.prefix}/SystemCheck/running`, NetworkTablesTypeInfos.kBoolean, false);
+    const status = ntcore.createTopic<string>(`${this.prefix}/Status`, NetworkTablesTypeInfos.kString, "Unknown status, no error.");
 
     const faultsTopic = ntcore.createTopic<string[]>(`${this.prefix}/faults`, NetworkTablesTypeInfos.kStringArray);
     faultsTopic.subscribe((value) => {
       if(value) this.faults.value = value;
+    });
+
+    this.running.subscribe(running => {
+      console.log(this.prefix, running);
+      if(typeof running === "boolean") this.runStatus.value = running;
+    });
+
+    status.subscribe(status => {
+      console.log(this.prefix, status);
+      if(status) this.statusText.value = status;
     });
   }
 

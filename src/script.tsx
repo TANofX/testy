@@ -31,21 +31,38 @@ function App() {
   return (
     <div>
       <div className="body">
+        <Row type="fault" subsystem="Test">
+          Not fast enough
+        </Row>
+        <Row type="info" subsystem="Test">
+          No error.
+        </Row>
         {Object.entries(checks.value).map(([name, check]) =>
-          check.faults.value.length ? check.faults.value.map((fault) => (
-            <Row type="warning" subsystem={name}>
-              {fault}
+          check.runStatus.value ? (
+            <Row type="running" subsystem={name}>
+              Executing <code>SystemCheck</code> command...
             </Row>
-          )) : <Row type="info" subsystem={name}>
-            No error.
-          </Row>
+          ) : check.faults.value.length ? (
+            check.faults.value.map((fault) => (
+              <Row type="fault" subsystem={name}>
+                {fault}
+              </Row>
+            ))
+          ) : (
+            <Row type="info" subsystem={name}>
+              {check.statusText}
+            </Row>
+          )
         )}
       </div>
       <div className="side">
-        <SlButton onClick={() => {
-          for(const check of Object.values(checks.value))
-            check.run();
-        }}>Run Checks</SlButton>
+        <SlButton
+          onClick={() => {
+            for (const check of Object.values(checks.value)) check.run();
+          }}
+        >
+          Run Checks
+        </SlButton>
       </div>
       <div className="stat">
         <div
@@ -68,11 +85,11 @@ function App() {
               ? `roborio-${ip}-frc.local`
               : ip;
             const port = Number.isNaN(parseInt(p)) ? 5810 : parseInt(p);
-            ntcore.changeURI(ip, port);
-            localStorage.setItem("ip", ip);
+            ntcore.changeURI(address, port);
+            localStorage.setItem("ip", address);
             localStorage.setItem("port", `${p}`);
-            // @ts-ignore
             addr.value = address;
+            checks.value = {};
           }}
         >
           <code>{addr}</code>
