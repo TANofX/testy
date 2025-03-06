@@ -1,15 +1,13 @@
-# testy
+# Testy
 
-To install dependencies:
+A SystemCheck Monitor that shows faults of all subsystems listed in `/SmartDashboard/SystemStatus/`.
+![SystemStatus scheme](asset/image.png)
 
+## Installation
+Download binary from Release.
+
+## Development
 ```bash
-bun install
+$ nix-shell
+$ bun tauri dev
 ```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.31. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
