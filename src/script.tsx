@@ -35,9 +35,6 @@ function App() {
   return (
     <div>
       <div className="body">
-        <Row type="fault" subsystem="Test">
-          ERROR
-        </Row>
         {Object.entries(checks.value)
           .sort(
             ([, checkA], [, checkB]) =>
