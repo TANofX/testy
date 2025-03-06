@@ -1,14 +1,9 @@
-import { registerIconLibrary } from "@shoelace-style/shoelace/dist/shoelace.js";
 import { Row } from "./components/row";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { connected, ntcore, checks, enabled, clearEventTarget } from "./nt";
 import { render } from "preact";
 import { signal } from "@preact/signals";
 import { toast } from "./components/toast";
-registerIconLibrary("default", {
-  resolver: (name) =>
-    `https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/${name}.svg`,
-});
 
 if ("serviceWorker" in navigator)
   navigator.serviceWorker.register(new URL("sw.js", import.meta.url), {
@@ -40,6 +35,9 @@ function App() {
   return (
     <div>
       <div className="body">
+        <Row type="fault" subsystem="Test">
+          ERROR
+        </Row>
         {Object.entries(checks.value)
           .sort(
             ([, checkA], [, checkB]) =>

@@ -4,6 +4,7 @@
   "devDependencies": {
     "@parcel/packager-raw-url": "^2.13.3",
     "@parcel/packager-xml": "^2.13.3",
+    "@tauri-apps/cli": "^2.3.1",
     "@types/bun": "latest",
     "parcel": "^2.13.3",
     "process": "^0.11.10"
@@ -15,6 +16,9 @@
     "@parcel/service-worker": "^2.13.3",
     "@preact/signals": "^2.0.1",
     "@shoelace-style/shoelace": "^2.20.0",
+    "@types/feather-icons": "^4.29.4",
+    "feather-icons": "^4.29.2",
+    "feather-icons-react": "^0.8.1",
     "ntcore-ts-client": "^3.1.2",
     "parcel-config-pwa-manifest": "^0.1.6",
     "preact": "^10.26.4"

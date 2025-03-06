@@ -45,3 +45,9 @@ div {
 div.sl-toast-stack > sl-alert::part(base) {
   border-top: none;
 }
+.body > sl-alert::part(base) {
+  background-color: var(--sl-color-danger-200);
+}
+.body > sl-alert::part(icon) {
+  color: #fff;
+}

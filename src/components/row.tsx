@@ -1,15 +1,16 @@
 import { SlAlert, SlIcon } from "@shoelace-style/shoelace/dist/react";
+import FeatherIcon, { type FeatherIconName } from "feather-icons-react";
 
 export function Row(props: { type: "info" | "fault" | "running" | "unknown", children?: any, subsystem: string }) {
   const { icon, variant } = {
-    info: { icon: "check-circle", variant: "primary" as "primary" },
-    fault: { icon: "alert-triangle", variant: "warning" as "warning" },
+    info: { icon: "check-circle", variant: "success" as "success" },
+    fault: { icon: "alert-triangle", variant: "danger" as "danger" },
     running: { icon: "play", variant: "neutral" as "neutral" },
     unknown: { icon: "help-circle", variant: "neutral" as "neutral" },
   }[props.type];
   return (
     <SlAlert open variant={variant}>
-      <SlIcon slot="icon" name={icon} />
+      <FeatherIcon slot="icon" icon={icon as FeatherIconName} />
       <strong style={{float: "end"}}>{props.subsystem}</strong>: {props.children}
     </SlAlert>
   );
