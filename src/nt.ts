@@ -9,29 +9,40 @@ const savedIp = localStorage.getItem("ip");
 const savedPort = localStorage.getItem("port");
 const connected = signal("Loading");
 const enabled = signal(false);
-var wasOnline = false, wasEnabled = false;
+var wasOnline = false,
+  wasEnabled = false;
 
 // Get or create the NT client instance
-const ntcore = NetworkTables.getInstanceByURI(savedIp || "127.0.0.1", Number(savedPort) || 5810);
-ntcore.addRobotConnectionListener(online => {
+const ntcore = NetworkTables.getInstanceByURI(
+  savedIp || "127.0.0.1",
+  Number(savedPort) || 5810
+);
+ntcore.addRobotConnectionListener((online) => {
   connected.value = online ? "Connected" : "Disconnected";
-  if(!online) {
+  if (!online) {
     enabled.value = false;
   }
-  if(online != wasOnline) {
+  if (online != wasOnline) {
     wasOnline = online;
-    if(online) toast("Connected to the robot.");
+    if (online) toast("Connected to the robot.");
     else toast("Disconnected from the robot.", "warning");
   }
 });
 const sysStats = ntcore.createPrefixTopic("/SmartDashboard/SystemStatus");
-const state = ntcore.createTopic<number>(`/FMSInfo/FMSControlData`, NetworkTablesTypeInfos.kInteger, 0);
+const state = ntcore.createTopic<number>(
+  `/FMSInfo/FMSControlData`,
+  NetworkTablesTypeInfos.kInteger,
+  0
+);
 
 sysStats.subscribe((value, params) => {
   const match = params.name.match(/^\/SmartDashboard\/SystemStatus\/([^/]+)/);
   const name = match?.[1];
   if (name && !checks.value[name]) {
     checks.value = { ...checks.value, [name]: new Check(name) };
+    checks.value = { ...checks.value, [name + "a"]: new Check(name + "a") };
+    checks.value = { ...checks.value, [name + "b"]: new Check(name + "b") };
+    checks.value = { ...checks.value, [name + "c"]: new Check(name + "c") };
   }
   ntEvents.dispatchEvent(new NetworkTablesEvent(params.name, value));
   ntStore[params.name] = value;
@@ -40,40 +51,53 @@ sysStats.subscribe((value, params) => {
 state.subscribe((value) => {
   const isEnabled: boolean = value ? value > 32 : false;
   enabled.value = isEnabled;
-  if(isEnabled != wasEnabled) {
+  if (isEnabled != wasEnabled) {
     wasEnabled = isEnabled;
-    if(isEnabled) toast("Robot enabled.");
+    if (isEnabled) toast("Robot enabled.");
     else toast("Robot disabled.");
   }
-})
+});
 
 class Check {
   private prefix: string;
   private running;
+  private next?: (value: unknown) => void;
   public faults = signal<string[]>([]);
   public runStatus = signal(false);
   public statusText = signal("Unknown status");
-  
+
   constructor(name: string) {
     this.prefix = `/SmartDashboard/SystemStatus/${name}`;
-    this.running = ntcore.createTopic<boolean>(`${this.prefix}/SystemCheck/running`, NetworkTablesTypeInfos.kBoolean, false);
-    ntEvents.addEventListener(`${this.prefix}/Faults`, e => {
+    this.running = ntcore.createTopic<boolean>(
+      `${this.prefix}/SystemCheck/running`,
+      NetworkTablesTypeInfos.kBoolean,
+      false
+    );
+    ntEvents.addEventListener(`${this.prefix}/Faults`, (e) => {
       const { value } = e as NetworkTablesEvent<string[]>;
       this.faults.value = value;
     });
-    ntEvents.addEventListener(`${this.prefix}/Status`, e => {
+    ntEvents.addEventListener(`${this.prefix}/Status`, (e) => {
       const { value } = e as NetworkTablesEvent<string>;
       this.statusText.value = value || "Unknown status";
     });
-    ntEvents.addEventListener(`${this.prefix}/SystemCheck/running`, e => {
+    ntEvents.addEventListener(`${this.prefix}/SystemCheck/running`, (e) => {
       const { value } = e as NetworkTablesEvent<boolean>;
       this.runStatus.value = value || false;
+      if (value === false && this.next) {
+        this.next(0);
+        this.next = undefined;
+      }
     });
   }
 
   async run() {
     await this.running.publish();
     this.running.setValue(true);
+    let next: (value: unknown) => void = () => {};
+    const promise = new Promise((r) => (next = r));
+    this.next = next;
+    return promise;
   }
 }
 
@@ -89,10 +113,4 @@ function clearEventTarget() {
   ntEvents = new EventTarget();
 }
 
-export {
-    ntcore,
-    connected,
-    checks,
-    enabled,
-    clearEventTarget,
-};
+export { ntcore, connected, checks, enabled, clearEventTarget, ntStore };

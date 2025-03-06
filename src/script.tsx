@@ -26,10 +26,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
   toast("Install the App for offline use!");
 });
 
-window.addEventListener("error", ev => {
+window.addEventListener("error", (ev) => {
   toast(`${ev.message}`, "danger");
 });
-window.addEventListener("unhandledrejection", ev => {
+window.addEventListener("unhandledrejection", (ev) => {
   toast(`${ev.reason}`, "danger");
 });
 
@@ -72,11 +72,25 @@ function App() {
       </div>
       <div className="side">
         <SlButton
-          onClick={() => {
-            if(enabled.value) {
-              for (const check of Object.values(checks.value)) check.run();
-              toast("SystemCheck requested.");
-            } else toast("Robot is not enabled.", "danger");
+          onClick={async (ev) => {
+            const button = ev.currentTarget;
+            let current: string = "None";
+            try {
+              if (enabled.value) {
+                button.disabled = true;
+                toast("SystemCheck requested.");
+                for (const [name, check] of Object.entries(checks.value)) {
+                  current = name;
+                  await check.run();
+                }
+                toast("SystemCheck completed.");
+                button.disabled = false;
+              } else toast("Robot is not enabled.", "danger");
+            } catch (e) {
+              toast(`SystemCheck failed at ${current}.`, "danger");
+              console.log(e);
+              button.disabled = false;
+            }
           }}
         >
           Run Checks
