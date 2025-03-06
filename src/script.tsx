@@ -135,7 +135,7 @@ function App() {
           <code>{addr}</code>
         </div>
         <div>{connected}</div>
-        <div>{enabled ? "En" : "Dis"}abled</div>
+        <div>{enabled.value ? "En" : "Dis"}abled</div>
       </div>
     </div>
   );
