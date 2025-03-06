@@ -14,7 +14,7 @@ addEventListener("activate", (e) => e.waitUntil(activate()));
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.open(cacheVersion).then((cache) => {
+    caches.open(version).then((cache) => {
       return cache.match(event.request).then((response) => {
         event.request.importance = "low"; //low priority
         const fetchPromise = fetch(event.request)
