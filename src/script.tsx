@@ -101,11 +101,12 @@ function App() {
           id="install-button"
           style={{ display: "none" }}
           onClick={(ev) => {
+            const button = ev.currentTarget;
             if (deferredPrompt) {
               deferredPrompt.prompt();
               deferredPrompt.userChoice.then((v) => {
                 if (v.outcome === "accepted") {
-                  ev.currentTarget.style.display = "none";
+                  button.style.display = "none";
                   toast("Installing PWA...");
                 }
               });
