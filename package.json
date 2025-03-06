@@ -15,7 +15,6 @@
     "@parcel/service-worker": "^2.13.3",
     "@preact/signals": "^2.0.1",
     "@shoelace-style/shoelace": "^2.20.0",
-    "express": "^4.21.2",
     "ntcore-ts-client": "^3.1.2",
     "parcel-config-pwa-manifest": "^0.1.6",
     "preact": "^10.26.4"
