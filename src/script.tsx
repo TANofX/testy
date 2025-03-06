@@ -88,7 +88,7 @@ function App() {
               } else toast("Robot is not enabled.", "danger");
             } catch (e) {
               toast(`SystemCheck failed at ${current}.`, "danger");
-              console.log(e);
+              console.error(e);
               button.disabled = false;
             }
           }}
