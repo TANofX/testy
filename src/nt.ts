@@ -1,18 +1,27 @@
 import { signal } from "@preact/signals";
 import { NetworkTables, NetworkTablesTypeInfos } from "ntcore-ts-client";
+import { toast } from "./components/toast";
 
 const checks = signal<Record<string, Check>>({});
+var ntEvents = new EventTarget();
+const ntStore: Record<string, any> = {};
 const savedIp = localStorage.getItem("ip");
 const savedPort = localStorage.getItem("port");
 const connected = signal("Loading");
-const enabled = signal("Loading");
+const enabled = signal(false);
+var wasOnline = false, wasEnabled = false;
 
 // Get or create the NT client instance
 const ntcore = NetworkTables.getInstanceByURI(savedIp || "127.0.0.1", Number(savedPort) || 5810);
 ntcore.addRobotConnectionListener(online => {
   connected.value = online ? "Connected" : "Disconnected";
   if(!online) {
-    enabled.value = "Unknown";
+    enabled.value = false;
+  }
+  if(online != wasOnline) {
+    wasOnline = online;
+    if(online) toast("Connected to the robot.");
+    else toast("Disconnected from the robot.", "warning");
   }
 });
 const sysStats = ntcore.createPrefixTopic("/SmartDashboard/SystemStatus");
@@ -23,19 +32,24 @@ sysStats.subscribe((value, params) => {
   const name = match?.[1];
   if (name && !checks.value[name]) {
     checks.value = { ...checks.value, [name]: new Check(name) };
-    console.log(`Subsystem registered: ${name}`);
   }
+  ntEvents.dispatchEvent(new NetworkTablesEvent(params.name, value));
+  ntStore[params.name] = value;
 });
 
 state.subscribe((value) => {
-  enabled.value = value ? "Enabled" : "Disabled";
+  const isEnabled: boolean = value ? value > 32 : false;
+  enabled.value = isEnabled;
+  if(isEnabled != wasEnabled) {
+    wasEnabled = isEnabled;
+    if(isEnabled) toast("Robot enabled.");
+    else toast("Robot disabled.");
+  }
 })
 
 class Check {
   private prefix: string;
   private running;
-  private status;
-  private faultsTopic;
   public faults = signal<string[]>([]);
   public runStatus = signal(false);
   public statusText = signal("Unknown status");
@@ -43,41 +57,42 @@ class Check {
   constructor(name: string) {
     this.prefix = `/SmartDashboard/SystemStatus/${name}`;
     this.running = ntcore.createTopic<boolean>(`${this.prefix}/SystemCheck/running`, NetworkTablesTypeInfos.kBoolean, false);
-    this.status = ntcore.createTopic<string>(`${this.prefix}/Status`, NetworkTablesTypeInfos.kString, "Unknown status, no error.");
-
-    this.faultsTopic = ntcore.createTopic<string[]>(`${this.prefix}/Faults`, NetworkTablesTypeInfos.kStringArray);
-    this.faultsTopic.subscribe((value) => {
-      if(value) this.faults.value = value;
+    ntEvents.addEventListener(`${this.prefix}/Faults`, e => {
+      const { value } = e as NetworkTablesEvent<string[]>;
+      this.faults.value = value;
     });
-    this.faults.value = this.faultsTopic.getValue() || [];
-
-    this.running.subscribe(running => {
-      if(typeof running === "boolean") this.runStatus.value = running;
+    ntEvents.addEventListener(`${this.prefix}/Status`, e => {
+      const { value } = e as NetworkTablesEvent<string>;
+      this.statusText.value = value || "Unknown status";
     });
-    this.runStatus.value = this.running.getValue() || false;
-
-    this.status.subscribe(status => {
-      if(status) this.statusText.value = status;
+    ntEvents.addEventListener(`${this.prefix}/SystemCheck/running`, e => {
+      const { value } = e as NetworkTablesEvent<boolean>;
+      this.runStatus.value = value || false;
     });
-    this.statusText.value = this.status.getValue() || "Unknown status";
   }
 
   async run() {
     await this.running.publish();
     this.running.setValue(true);
   }
+}
 
-  destroy() {
-    this.running.unsubscribeAll();
-    this.running.unpublish();
-    this.faultsTopic.unsubscribeAll();
-    this.status.unsubscribeAll();
+class NetworkTablesEvent<T> extends Event {
+  value: T;
+  constructor(path: string, data: T) {
+    super(path);
+    this.value = data;
   }
+}
+
+function clearEventTarget() {
+  ntEvents = new EventTarget();
 }
 
 export {
     ntcore,
     connected,
     checks,
-    enabled
+    enabled,
+    clearEventTarget,
 };

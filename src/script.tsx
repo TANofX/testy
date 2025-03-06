@@ -1,9 +1,10 @@
 import { registerIconLibrary } from "@shoelace-style/shoelace/dist/shoelace.js";
 import { Row } from "./components/row";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { connected, ntcore, checks, enabled } from "./nt";
+import { connected, ntcore, checks, enabled, clearEventTarget } from "./nt";
 import { render } from "preact";
 import { signal } from "@preact/signals";
+import { toast } from "./components/toast";
 registerIconLibrary("default", {
   resolver: (name) =>
     `https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/${name}.svg`,
@@ -22,6 +23,14 @@ window.addEventListener("beforeinstallprompt", (e) => {
   if (installButton) {
     installButton.style.display = "block";
   }
+  toast("Install the App for offline use!");
+});
+
+window.addEventListener("error", ev => {
+  toast(`${ev.message}`, "danger");
+});
+window.addEventListener("unhandledrejection", ev => {
+  toast(`${ev.reason}`, "danger");
 });
 
 const savedIp = localStorage.getItem("ip");
@@ -31,28 +40,44 @@ function App() {
   return (
     <div>
       <div className="body">
-        {Object.entries(checks.value).map(([name, check]) =>
-          check.runStatus.value ? (
-            <Row type="running" subsystem={name}>
-              Executing <code>SystemCheck</code> command...
-            </Row>
-          ) : check.faults.value.length ? (
-            check.faults.value.map((fault) => (
-              <Row type="fault" subsystem={name}>
-                {fault}
-              </Row>
-            ))
-          ) : (
-            <Row type="info" subsystem={name}>
-              {check.statusText}
-            </Row>
+        {Object.entries(checks.value)
+          .sort(
+            ([, checkA], [, checkB]) =>
+              checkB.faults.value.length - checkA.faults.value.length ||
+              Number(checkA.statusText.value.includes("OK")) -
+                Number(checkB.statusText.value.includes("OK"))
           )
-        )}
+          .map(([name, check]) =>
+            check.runStatus.value ? (
+              <Row type="running" subsystem={name}>
+                Executing <code>SystemCheck</code> command...
+              </Row>
+            ) : check.faults.value.length ? (
+              check.faults.value.map((fault) => (
+                <Row type="fault" subsystem={name}>
+                  {fault}
+                </Row>
+              ))
+            ) : (
+              <Row
+                type={
+                  check.statusText.value.includes("OK") ? "info" : "unknown"
+                }
+                subsystem={name}
+              >
+                {check.statusText}
+              </Row>
+            )
+          )}
       </div>
       <div className="side">
+        <img src="/favicon.png"></img>
         <SlButton
           onClick={() => {
-            for (const check of Object.values(checks.value)) check.run();
+            if(enabled.value) {
+              for (const check of Object.values(checks.value)) check.run();
+              toast("SystemCheck requested.");
+            } else toast("Robot is not enabled.", "danger");
           }}
         >
           Run Checks
@@ -62,9 +87,15 @@ function App() {
         <div
           id="install-button"
           style={{ display: "none" }}
-          onClick={() => {
+          onClick={(ev) => {
             if (deferredPrompt) {
               deferredPrompt.prompt();
+              deferredPrompt.userChoice.then((v) => {
+                if (v.outcome === "accepted") {
+                  ev.currentTarget.style.display = "none";
+                  toast("Installing PWA...");
+                }
+              });
             }
           }}
         >
@@ -83,14 +114,14 @@ function App() {
             localStorage.setItem("ip", address);
             localStorage.setItem("port", `${p}`);
             addr.value = address;
-            for (const check of Object.values(checks.value)) check.destroy();
+            clearEventTarget();
             checks.value = {};
           }}
         >
           <code>{addr}</code>
         </div>
         <div>{connected}</div>
-        <div>{enabled}</div>
+        <div>{enabled ? "En" : "Dis"}abled</div>
       </div>
     </div>
   );
