@@ -71,7 +71,6 @@ function App() {
           )}
       </div>
       <div className="side">
-        <img src="/favicon.png"></img>
         <SlButton
           onClick={() => {
             if(enabled.value) {
