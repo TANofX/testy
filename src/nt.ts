@@ -40,9 +40,6 @@ sysStats.subscribe((value, params) => {
   const name = match?.[1];
   if (name && !checks.value[name]) {
     checks.value = { ...checks.value, [name]: new Check(name) };
-    checks.value = { ...checks.value, [name + "a"]: new Check(name + "a") };
-    checks.value = { ...checks.value, [name + "b"]: new Check(name + "b") };
-    checks.value = { ...checks.value, [name + "c"]: new Check(name + "c") };
   }
   ntEvents.dispatchEvent(new NetworkTablesEvent(params.name, value));
   ntStore[params.name] = value;
