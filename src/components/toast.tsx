@@ -2,11 +2,12 @@ export function toast(text: string, variant: 'primary' | 'success' | 'neutral' |
     const alert = Object.assign(document.createElement('sl-alert'), {
         variant,
         closable: true,
-        duration: 3000,
+        duration: 5000,
         innerHTML: `
           <sl-icon name="${icon}" slot="icon"></sl-icon>
           ${escapeHtml(text)}
-        `
+        `,
+        countdown: "rtl"
       });
   
       document.body.append(alert);
