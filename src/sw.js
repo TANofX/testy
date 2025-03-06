@@ -19,7 +19,7 @@ self.addEventListener("fetch", (event) => {
         event.request.importance = "low"; //low priority
         const fetchPromise = fetch(event.request)
           .then((networkResponse) => {
-            if (filesToCache.includes(new URL(event.request.url).pathname)) {
+            if (manifest.includes(new URL(event.request.url).pathname)) {
               //if the file is in the cache list
               cache.put(event.request, networkResponse.clone());
             }
