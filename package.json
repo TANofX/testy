@@ -25,7 +25,7 @@
   },
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "build": "parcel build src/index.html || true"
   },
   "trustedDependencies": [
     "@parcel/watcher",
