@@ -6,9 +6,11 @@ import { signal } from "@preact/signals";
 import { toast } from "./components/toast";
 
 if ("serviceWorker" in navigator)
-  navigator.serviceWorker.register(new URL("sw.js", import.meta.url), {
-    type: "module",
-  });
+  navigator.serviceWorker
+    .register(new URL("sw.js", import.meta.url), {
+      type: "module",
+    })
+    .catch((r) => console.warn("Failed to register service worker", r));
 
 let deferredPrompt: BeforeInstallPromptEvent;
 window.addEventListener("beforeinstallprompt", (e) => {
