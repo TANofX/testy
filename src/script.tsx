@@ -4,6 +4,8 @@ import { connected, ntcore, checks, enabled, clearEventTarget } from "./nt";
 import { render } from "preact";
 import { signal } from "@preact/signals";
 import { toast } from "./components/toast";
+import FeatherIcon from "feather-icons-react";
+const favicon = new URL("favicon.png", import.meta.url);
 
 if ("serviceWorker" in navigator)
   navigator.serviceWorker
@@ -36,7 +38,29 @@ const addr = signal(savedIp || "127.0.0.1");
 function App() {
   return (
     <div>
-      <div className="body">
+      <div class="body">
+        <div
+          class="welcome"
+          hidden={Object.keys(checks.value).length > 0}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <img
+            src={favicon.href}
+            height="100"
+            width="100"
+            style={{
+              filter: "saturate(0)",
+              opacity: 0.1,
+              height: "min(50vh, 50vw)",
+              width: "min(50vh, 50vw)",
+            }}
+          ></img>
+        </div>
         {Object.entries(checks.value)
           .sort(
             ([, checkA], [, checkB]) =>
@@ -66,32 +90,6 @@ function App() {
               </Row>
             )
           )}
-      </div>
-      <div className="side">
-        <SlButton
-          onClick={async (ev) => {
-            const button = ev.currentTarget;
-            let current: string = "None";
-            try {
-              if (enabled.value) {
-                button.disabled = true;
-                toast("SystemCheck requested.");
-                for (const [name, check] of Object.entries(checks.value)) {
-                  current = name;
-                  await check.run();
-                }
-                toast("SystemCheck completed.");
-                button.disabled = false;
-              } else toast("Robot is not enabled.", "danger");
-            } catch (e) {
-              toast(`SystemCheck failed at ${current}.`, "danger");
-              console.error(e);
-              button.disabled = false;
-            }
-          }}
-        >
-          Run Checks
-        </SlButton>
       </div>
       <div className="stat">
         <div
@@ -134,6 +132,32 @@ function App() {
         <div>{connected}</div>
         <div>{enabled.value ? "En" : "Dis"}abled</div>
       </div>
+      <SlButton
+        onClick={async (ev) => {
+          const button = ev.currentTarget;
+          let current: string = "None";
+          try {
+            if (enabled.value) {
+              button.disabled = true;
+              toast("SystemCheck requested.");
+              for (const [name, check] of Object.entries(checks.value)) {
+                current = name;
+                await check.run();
+              }
+              toast("SystemCheck completed.");
+              button.disabled = false;
+            } else toast("Robot is not enabled.", "danger");
+          } catch (e) {
+            toast(`SystemCheck failed at ${current}.`, "danger");
+            console.error(e);
+            button.disabled = false;
+          }
+        }}
+        circle
+        class="float"
+      >
+        <FeatherIcon icon="play"></FeatherIcon>
+      </SlButton>
     </div>
   );
 }
