@@ -96,11 +96,11 @@ class Check {
   }
 
   async run() {
-    console.log("pub");
+    console.log(this.prefix, "pub");
     await this.running.publish();
-    console.log("set");
+    console.log(this.prefix, "set");
     this.running.setValue(true);
-    console.log("done");
+    console.log(this.prefix, "done");
     let next: (value: unknown) => void = () => {};
     const promise = new Promise((r) => (next = r));
     this.next = next;
@@ -119,7 +119,5 @@ class NetworkTablesEvent<T> extends Event {
 function clearEventTarget() {
   ntEvents = new EventTarget();
 }
-
-checks.value = Object.fromEntries(["CoralHandler", "CoralHandlerWristVertical", "CoralHandlerWristHorizontal"].map(e=>([e, new Check(e)])));
 
 export { ntcore1, ntcore2, connected, checks, enabled, clearEventTarget, ntStore };
