@@ -58,4 +58,7 @@ div.sl-toast-stack > sl-alert::part(base) {
 .float > svg {
   position: fixed;
   transform: translate(-40%, 25%);
+  &.feather-square {
+    transform: translate(-50%, 25%);
+  }
 }

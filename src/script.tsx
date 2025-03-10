@@ -1,7 +1,5 @@
 import { Row } from "./components/row";
-import {
-  SlButton
-} from "@shoelace-style/shoelace/dist/react";
+import { SlButton, SlSpinner } from "@shoelace-style/shoelace/dist/react";
 import {
   connected,
   ntcore1,
@@ -42,6 +40,7 @@ window.addEventListener("unhandledrejection", (ev) => {
 
 const savedIp = localStorage.getItem("ip");
 const addr = signal(savedIp || "127.0.0.1");
+const running = signal(false);
 
 function App() {
   return (
@@ -135,30 +134,41 @@ function App() {
         <div>{enabled.value ? "En" : "Dis"}abled</div>
       </div>
       <SlButton
-        onClick={async (ev) => {
-          const button = ev.currentTarget;
+        onClick={async () => {
           let current: string = "None";
+          if (running.value) return (running.value = false);
           try {
             if (enabled.value) {
-              button.disabled = true;
+              running.value = true;
               toast("SystemCheck requested.");
               for (const [name, check] of Object.entries(checks.value)) {
                 current = name;
                 await check.run();
+                if (!running.value) break;
               }
               toast("SystemCheck completed.");
-              button.disabled = false;
+              running.value = false;
             } else toast("Robot is not enabled.", "danger");
           } catch (e) {
             toast(`SystemCheck failed at ${current}.`, "danger");
             console.error(e);
-            button.disabled = false;
+            running.value = false;
           }
         }}
         circle
         class="float"
       >
-        <FeatherIcon icon="play"></FeatherIcon>
+        <FeatherIcon icon={running.value ? "square" : "play"}></FeatherIcon>
+        {running.value && (
+          <SlSpinner
+            style={{
+              fontSize: "2.5rem",
+              "--track-width": "3px",
+              '--indicator-color': 'orange'
+            }}
+            class="float"
+          ></SlSpinner>
+        )}
       </SlButton>
     </div>
   );
