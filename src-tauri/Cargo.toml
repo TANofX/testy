@@ -1,6 +1,6 @@
 [package]
-name = "app"
-version = "0.1.0"
+name = "testy"
+version = "2.1.0"
 description = "SystemCheck monitor as a website"
 authors = ["you"]
 license = ""
