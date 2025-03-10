@@ -1,6 +1,6 @@
 import { Row } from "./components/row";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { connected, ntcore, checks, enabled, clearEventTarget } from "./nt";
+import { connected, ntcore1, checks, enabled, clearEventTarget, ntcore2 } from "./nt";
 import { render } from "preact";
 import { signal } from "@preact/signals";
 import { toast } from "./components/toast";
@@ -119,7 +119,8 @@ function App() {
               ? `roborio-${ip}-frc.local`
               : ip;
             const port = Number.isNaN(parseInt(p)) ? 5810 : parseInt(p);
-            ntcore.changeURI(address, port);
+            ntcore1.changeURI(address, port);
+            ntcore2.changeURI(address, port);
             localStorage.setItem("ip", address);
             localStorage.setItem("port", `${p}`);
             addr.value = address;

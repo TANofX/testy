@@ -12,12 +12,19 @@ const enabled = signal(false);
 var wasOnline = false,
   wasEnabled = false;
 
-// Get or create the NT client instance
-const ntcore = NetworkTables.getInstanceByURI(
+// Everything else
+const ntcore1 = NetworkTables.getInstanceByURI(
   savedIp || "127.0.0.1",
   Number(savedPort) || 5810
 );
-ntcore.addRobotConnectionListener((online) => {
+// Prefix topic handler
+// @ts-ignore This line makes ntcore ignore existing instance and create a new one
+NetworkTables._instances.clear();
+const ntcore2 = NetworkTables.getInstanceByURI(
+  savedIp || "127.0.0.1",
+  Number(savedPort) || 5810
+);
+ntcore1.addRobotConnectionListener((online) => {
   connected.value = online ? "Connected" : "Disconnected";
   if (!online) {
     enabled.value = false;
@@ -28,8 +35,8 @@ ntcore.addRobotConnectionListener((online) => {
     else toast("Disconnected from the robot.", "warning");
   }
 });
-const sysStats = ntcore.createPrefixTopic("/SmartDashboard/SystemStatus");
-const state = ntcore.createTopic<number>(
+const sysStats = ntcore2.createPrefixTopic("/SmartDashboard/SystemStatus");
+const state = ntcore1.createTopic<number>(
   `/FMSInfo/FMSControlData`,
   NetworkTablesTypeInfos.kInteger,
   0
@@ -65,7 +72,7 @@ class Check {
 
   constructor(name: string) {
     this.prefix = `/SmartDashboard/SystemStatus/${name}`;
-    this.running = ntcore.createTopic<boolean>(
+    this.running = ntcore1.createTopic<boolean>(
       `${this.prefix}/SystemCheck/running`,
       NetworkTablesTypeInfos.kBoolean,
       false
@@ -89,8 +96,11 @@ class Check {
   }
 
   async run() {
+    console.log("pub");
     await this.running.publish();
+    console.log("set");
     this.running.setValue(true);
+    console.log("done");
     let next: (value: unknown) => void = () => {};
     const promise = new Promise((r) => (next = r));
     this.next = next;
@@ -110,4 +120,6 @@ function clearEventTarget() {
   ntEvents = new EventTarget();
 }
 
-export { ntcore, connected, checks, enabled, clearEventTarget, ntStore };
+checks.value = Object.fromEntries(["CoralHandler", "CoralHandlerWristVertical", "CoralHandlerWristHorizontal"].map(e=>([e, new Check(e)])));
+
+export { ntcore1, ntcore2, connected, checks, enabled, clearEventTarget, ntStore };
