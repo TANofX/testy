@@ -1,10 +1,20 @@
 import { Row } from "./components/row";
-import { SlButton } from "@shoelace-style/shoelace/dist/react";
-import { connected, ntcore1, checks, enabled, clearEventTarget, ntcore2 } from "./nt";
+import {
+  SlButton
+} from "@shoelace-style/shoelace/dist/react";
+import {
+  connected,
+  ntcore1,
+  checks,
+  enabled,
+  clearEventTarget,
+  ntcore2,
+} from "./nt";
 import { render } from "preact";
 import { signal } from "@preact/signals";
 import { toast } from "./components/toast";
 import FeatherIcon from "feather-icons-react";
+import { version } from "../package.json";
 const favicon = new URL("favicon.png", import.meta.url);
 
 if ("serviceWorker" in navigator)
@@ -14,15 +24,13 @@ if ("serviceWorker" in navigator)
     })
     .catch((r) => console.warn("Failed to register service worker", r));
 
-let deferredPrompt: BeforeInstallPromptEvent;
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
-  deferredPrompt = e as BeforeInstallPromptEvent;
   const installButton = document.getElementById("install-button");
   if (installButton) {
     installButton.style.display = "block";
   }
-  toast("Install the App for offline use!");
+  toast("Website is no longer supported, please download the app!", "danger");
 });
 
 window.addEventListener("error", (ev) => {
@@ -96,20 +104,13 @@ function App() {
           id="install-button"
           style={{ display: "none" }}
           onClick={(ev) => {
-            const button = ev.currentTarget;
-            if (deferredPrompt) {
-              deferredPrompt.prompt();
-              deferredPrompt.userChoice.then((v) => {
-                if (v.outcome === "accepted") {
-                  button.style.display = "none";
-                  toast("Installing PWA...");
-                }
-              });
-            }
+            ev.currentTarget.style.display = "none";
+            open("https://github.com/TANofX/testy/releases");
           }}
         >
           Install App
         </div>
+        <div>v{version}</div>
         <div
           onClick={() => {
             const team = prompt("Team number or IP Address");
