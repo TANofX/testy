@@ -1,7 +1,7 @@
 {
   "name": "testy",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "devDependencies": {
     "@parcel/packager-raw-url": "^2.13.3",
     "@parcel/packager-xml": "^2.13.3",
