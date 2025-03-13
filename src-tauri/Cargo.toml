@@ -1,6 +1,6 @@
 [package]
 name = "testy"
-version = "2.1.1"
+version = "2.2.0"
 description = "SystemCheck monitor as a website"
 authors = ["you"]
 license = ""
