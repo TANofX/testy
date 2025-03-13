@@ -121,4 +121,3 @@ function clearEventTarget() {
 }
 
 export { ntcore1, ntcore2, connected, checks, enabled, clearEventTarget, ntStore };
-checks.value = Object.fromEntries(["CoralHandler", "CoralHandlerWristVertical", "CoralHandlerWristHorizontal"].map(e=>([e, new Check(e)])));
