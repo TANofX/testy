@@ -62,3 +62,13 @@ div.sl-toast-stack > sl-alert::part(base) {
     transform: translate(-50%, 25%);
   }
 }
+
+sl-alert svg.feather-play:not([slot="icon"]) {
+  float: right;
+  &:hover {
+    color: greenyellow;
+  }
+  &.disabled {
+    filter: brightness(0.4);
+  }
+}
